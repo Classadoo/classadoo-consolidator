@@ -1,7 +1,9 @@
 var Firebase = require('firebase');
 
-var refIn =  new Firebase('https://classadoo-scratch.firebaseIO.com/students');
-var refOut =  new Firebase('https://classadoo-scratch.firebaseIO.com/snapshot');
+// var refIn =  new Firebase('https://classadoo-scratch.firebaseIO.com/students');
+// var refOut =  new Firebase('https://classadoo-scratch.firebaseIO.com/snapshot');
+var refIn =  new Firebase('https://classadoo-sd.firebaseIO.com/students');
+var refOut =  new Firebase('https://classadoo-sd.firebaseIO.com/snapshot');
 
 var scratches = {};
 
