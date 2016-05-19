@@ -19,10 +19,10 @@ refIn.on("child_added", function(child) {
 	var initialCursorSeen = false
 	var userKey = child.key()
 	refIn.child(userKey + "/editor/code").on("value", function(snap) {		
-		if (initialCodeSeen && !(userKey == "classadoo-instructor")) {				
+		if (initialCodeSeen && !(userKey == "classadoo-instructor")) {							
 			scratches[userKey] = snap.val();			
 		} else {
-			initialValSeen = true;
+			initialCodeSeen = true;
 		}		
 	})
 
@@ -30,7 +30,7 @@ refIn.on("child_added", function(child) {
 		if (initialCursorSeen && !(userKey == "classadoo-instructor")) {				
 			lastActive[userKey] = Date.now();			
 		} else {
-			initialValSeen = true;
+			initialCursorSeen = true;
 		}		
 	})
 })	
@@ -41,10 +41,10 @@ function updateSnapshot() {
 	console.log("scratches", scratches)
 
 	var timeIdle = {}
-	Object.keys(active).forEach(function(key) {
-		var timeSinceLastActive =  Date.now() - active[key];		
+	Object.keys(lastActive).forEach(function(key) {
+		var timeSinceLastActive =  Date.now() - lastActive[key];		
 		timeIdle[key] = timeSinceLastActive		
 	})
 
-	snapshotOut.set({code: scratches, idleTimes: timeIdle);	
+	snapshotOut.set({code: scratches, idleTimes: timeIdle});	
 }
