@@ -3,22 +3,32 @@ var Firebase = require('firebase');
 if (process.env.ENV == "prod") {
 	console.log("prodo mode");
 	var refIn =  new Firebase('https://classadoo-scratch.firebaseIO.com/students');
-	var refOut =  new Firebase('https://classadoo-scratch.firebaseIO.com/snapshot');
+	var snapshotOut =  new Firebase('https://classadoo-sd.firebaseIO.com/snapshot');	
 } else {
 	var refIn =  new Firebase('https://classadoo-sd.firebaseIO.com/students');
-	var refOut =  new Firebase('https://classadoo-sd.firebaseIO.com/snapshot');	
+	var snapshotOut =  new Firebase('https://classadoo-sd.firebaseIO.com/snapshot');	
 }
 
 
 
 var scratches = {};
+var lastActive = {};
 
 refIn.on("child_added", function(child) {
-	var initialValSeen = false
+	var initialCodeSeen = false
+	var initialCursorSeen = false
 	var userKey = child.key()
 	refIn.child(userKey + "/editor/code").on("value", function(snap) {		
-		if (initialValSeen && !(userKey == "classadoo-instructor")) {				
+		if (initialCodeSeen && !(userKey == "classadoo-instructor")) {				
 			scratches[userKey] = snap.val();			
+		} else {
+			initialValSeen = true;
+		}		
+	})
+
+	refIn.child(userKey + "/editor/lastTyped").on("value", function(snap) {		
+		if (initialCursorSeen && !(userKey == "classadoo-instructor")) {				
+			lastActive[userKey] = Date.now();			
 		} else {
 			initialValSeen = true;
 		}		
@@ -29,5 +39,12 @@ setInterval(updateSnapshot, 5000);
 
 function updateSnapshot() {
 	console.log("scratches", scratches)
-	refOut.update(scratches);
+
+	var timeIdle = {}
+	Object.keys(active).forEach(function(key) {
+		var timeSinceLastActive =  Date.now() - active[key];		
+		timeIdle[key] = timeSinceLastActive		
+	})
+
+	snapshotOut.set({code: scratches, idleTimes: timeIdle);	
 }
