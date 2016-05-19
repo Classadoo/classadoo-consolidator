@@ -3,7 +3,7 @@ var Firebase = require('firebase');
 if (process.env.ENV == "prod") {
 	console.log("prodo mode");
 	var refIn =  new Firebase('https://classadoo-scratch.firebaseIO.com/students');
-	var snapshotOut =  new Firebase('https://classadoo-sd.firebaseIO.com/snapshot');	
+	var snapshotOut =  new Firebase('https://classadoo-scratch.firebaseIO.com/snapshot');	
 } else {
 	var refIn =  new Firebase('https://classadoo-sd.firebaseIO.com/students');
 	var snapshotOut =  new Firebase('https://classadoo-sd.firebaseIO.com/snapshot');	
