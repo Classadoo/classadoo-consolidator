@@ -1,39 +1,44 @@
 var Firebase = require('firebase');
+var Wilddog = require('wilddog');
 
 if (process.env.ENV == "prod") {
-	console.log("prodo mode");
-	var refIn =  new Firebase('https://classadoo-scratch.firebaseIO.com/students');
+	console.log("prod mode");
+	var usRefIn =  new Firebase('https://classadoo-scratch.firebaseIO.com/students');
+	var chinaRefIn =  new Wilddog('https://classadoo-prod.wilddogio.com/students/');
 	var snapshotOut =  new Firebase('https://classadoo-scratch.firebaseIO.com/snapshot');	
 } else {
-	var refIn =  new Firebase('https://classadoo-sd.firebaseIO.com/students');
+	var usRefIn =  new Firebase('https://classadoo-sd.firebaseIO.com/students');
+	var chinaRefIn =  new Wilddog('https://classadoo-prod.wilddogio.com/students/');
 	var snapshotOut =  new Firebase('https://classadoo-sd.firebaseIO.com/snapshot');	
 }
-
-
 
 var scratches = {};
 var lastActive = {};
 
-refIn.on("child_added", function(child) {
-	var initialCodeSeen = false
-	var initialCursorSeen = false
-	var userKey = child.key()
-	refIn.child(userKey + "/editor/code").on("value", function(snap) {		
-		if (initialCodeSeen && !(userKey == "classadoo-instructor")) {							
-			scratches[userKey] = snap.val();			
-		} else {
-			initialCodeSeen = true;
-		}		
-	})
+var inRefs = [usRefIn, chinaRefIn]
 
-	refIn.child(userKey + "/editor/lastTyped").on("value", function(snap) {		
-		if (initialCursorSeen && !(userKey == "classadoo-instructor")) {				
-			lastActive[userKey] = Date.now();			
-		} else {
-			initialCursorSeen = true;
-		}		
-	})
-})	
+inRefs.forEach(function(ref) {
+	ref.on("child_added", function(child) {
+		var initialCodeSeen = false
+		var initialCursorSeen = false
+		var userKey = child.key()
+		ref.child(userKey + "/editor/code").on("value", function(snap) {		
+			if (initialCodeSeen && !(userKey == "classadoo-instructor")) {							
+				scratches[userKey] = snap.val();			
+			} else {
+				initialCodeSeen = true;
+			}		
+		})
+
+		ref.child(userKey + "/editor/lastTyped").on("value", function(snap) {		
+			if (initialCursorSeen && !(userKey == "classadoo-instructor")) {				
+				lastActive[userKey] = Date.now();			
+			} else {
+				initialCursorSeen = true;
+			}		
+		})
+	})	
+})
 
 setInterval(updateSnapshot, 5000);
 
