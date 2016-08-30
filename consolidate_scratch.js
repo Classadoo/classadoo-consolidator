@@ -3,11 +3,11 @@ var Wilddog = require('wilddog');
 
 if (process.env.ENV == "prod") {
 	console.log("prod mode");
-	var usRefIn =  new Firebase('https://classadoo-scratch.firebaseIO.com/students');
+	var usRefIn =  new Firebase('https://classadoo-prod.firebaseIO.com/students');
 	var chinaRefIn =  new Wilddog('https://classadoo-prod.wilddogio.com/students/');
 	var snapshotOut =  new Firebase('https://classadoo-scratch.firebaseIO.com/snapshot');	
 } else {
-	var usRefIn =  new Firebase('https://classadoo-sd.firebaseIO.com/students');
+	var usRefIn =  new Firebase('https://classadoo-prod.firebaseIO.com/students');
 	var chinaRefIn =  new Wilddog('https://classadoo-prod.wilddogio.com/students/');
 	var snapshotOut =  new Firebase('https://classadoo-sd.firebaseIO.com/snapshot');	
 }
@@ -22,7 +22,7 @@ inRefs.forEach(function(ref) {
 		var initialCodeSeen = false
 		var initialCursorSeen = false
 		var userKey = child.key()
-		ref.child(userKey + "/editor/code").on("value", function(snap) {		
+		ref.child(userKey + "/currentView/code").on("value", function(snap) {		
 			if (initialCodeSeen && !(userKey == "classadoo-instructor")) {							
 				scratches[userKey] = snap.val();			
 			} else {
@@ -30,7 +30,7 @@ inRefs.forEach(function(ref) {
 			}		
 		})
 
-		ref.child(userKey + "/editor/lastTyped").on("value", function(snap) {		
+		ref.child(userKey + "/currentView/lastTyped").on("value", function(snap) {		
 			if (initialCursorSeen && !(userKey == "classadoo-instructor")) {				
 				lastActive[userKey] = Date.now();			
 			} else {
