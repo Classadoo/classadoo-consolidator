@@ -3,17 +3,16 @@ var Wilddog = require('wilddog');
 
 if (process.env.ENV == "prod") {
 	console.log("prod mode");
-	var usRefIn =  new Firebase('https://classadoo-prod.firebaseIO.com/students');
-	var chinaRefIn =  new Wilddog('https://classadoo-prod.wilddogio.com/students/');
+	var usRefIn =  new Firebase('https://classadoo-prod.firebaseIO.com/v2/tools/textEditor/currentView/');
+	var chinaRefIn =  new Wilddog('https://classadoo-prod.wilddogio.com/v2/tools/textEditor/currentView/');
 	var snapshotOut =  new Firebase('https://classadoo-scratch.firebaseIO.com/snapshot');	
 } else {
-	var usRefIn =  new Firebase('https://classadoo-prod.firebaseIO.com/students');
-	var chinaRefIn =  new Wilddog('https://classadoo-prod.wilddogio.com/students/');
-	var snapshotOut =  new Firebase('https://classadoo-sd.firebaseIO.com/snapshot');	
+	var usRefIn =  new Firebase('https://classadoo-prod.firebaseIO.com/v2/tools/textEditor/currentView/');
+	var chinaRefIn =  new Wilddog('https://classadoo-prod.wilddogio.com/v2/tools/textEditor/currentView/');
+	var snapshotOut =  new Firebase('https://classadoo-scratch.firebaseIO.com/snapshot');	
 }
 
 var scratches = {};
-var lastActive = {};
 
 var inRefs = [usRefIn, chinaRefIn]
 
@@ -22,20 +21,14 @@ inRefs.forEach(function(ref) {
 		var initialCodeSeen = false
 		var initialCursorSeen = false
 		var userKey = child.key()
-		ref.child(userKey + "/currentView/code").on("value", function(snap) {		
-			if (initialCodeSeen && !(userKey == "classadoo-instructor")) {							
-				scratches[userKey] = snap.val();			
-			} else {
-				initialCodeSeen = true;
-			}		
-		})
-
-		ref.child(userKey + "/currentView/lastTyped").on("value", function(snap) {		
-			if (initialCursorSeen && !(userKey == "classadoo-instructor")) {				
-				lastActive[userKey] = Date.now();			
+		ref.child(userKey).on("value", function(snap) {		
+			if (initialCursorSeen && !(userKey == 575530)) {
+				var data = snap.val()
+				console.log("local is", data.localId);								
+				scratches[userKey] = {code: data.code, name: data.name || userKey, lastActive: Date.now()};
 			} else {
 				initialCursorSeen = true;
-			}		
+			}
 		})
 	})	
 })
@@ -43,13 +36,13 @@ inRefs.forEach(function(ref) {
 setInterval(updateSnapshot, 5000);
 
 function updateSnapshot() {
-	console.log("scratches", scratches)
+	console.log("scratches", scratches);
 
-	var timeIdle = {}
-	Object.keys(lastActive).forEach(function(key) {
-		var timeSinceLastActive =  Date.now() - lastActive[key];		
-		timeIdle[key] = timeSinceLastActive		
+	var timeIdle = {};
+	Object.keys(scratches).forEach(function(key) {
+		var timeSinceLastActive =  Date.now() - scratches[key].lastActive;		
+		scratches[key].idleTime = timeSinceLastActive;		
 	})
 
-	snapshotOut.set({code: scratches, idleTimes: timeIdle});	
+	snapshotOut.set({data: scratches});	
 }
