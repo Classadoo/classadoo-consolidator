@@ -25,7 +25,7 @@ inRefs.forEach(function(ref) {
 			if (initialCursorSeen && !(userKey == 575530)) {
 				var data = snap.val()
 				console.log("local is", data.localId);								
-				scratches[userKey] = {code: data.code, name: data.name || userKey, lastActive: Date.now()};
+				scratches[userKey] = {projectId: data.projectId, code: data.code, name: data.name || userKey, lastActive: Date.now()};
 			} else {
 				initialCursorSeen = true;
 			}
